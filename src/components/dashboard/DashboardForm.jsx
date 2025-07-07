@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { Navigate } from 'react-router-dom';
 import {
   Dropdown,
   DropdownItem,
@@ -16,13 +17,6 @@ const DashboardForm = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
-
-  const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    window.location.href = '/login'; // or use navigate('/login') if using react-router
-  };
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -51,7 +45,14 @@ const DashboardForm = () => {
               <DropdownItem className="text-end" style={{
                 backgroundColor: 'transparent',
               }}
-                onClick={handleLogout}
+                onClick={async () => {
+                  try {
+                    await dispatch(logout()).unwrap();
+                    Navigate('/login');
+                  } catch (err) {
+                    console.error('Logout failed:', err);
+                  }
+                }}
               >
                 Logout <i className="fa-solid fa-power-off ms-2"></i>
               </DropdownItem>

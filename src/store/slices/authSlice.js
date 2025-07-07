@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import { signinService, signupService } from "../../api/authServices";
+import {
+  logoutService,
+  signinService,
+  signupService,
+} from "../../api/authServices";
 
 const initialState = {
   isAuthenticated: !!localStorage.getItem("accessToken"),
@@ -31,6 +35,20 @@ export const signup = createAsyncThunk(
       return dispatch(
         login({ email: formData.email, password: formData.password })
       );
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const refreshToken = localStorage.getItem("refreshToken");
+      await logoutService({ accessToken, refreshToken });
+      return true;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -69,10 +87,17 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
+      })
+      .addCase(logout.fulfilled, (state) => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        state.isAuthenticated = false;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.user = null;
+        state.status = "idle";
       });
   },
 });
-
-export const { logout } = authSlice.actions;
 
 export default authSlice.reducer;
