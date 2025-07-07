@@ -3,7 +3,7 @@ import { Navigate, useOutletContext } from 'react-router-dom';
 import AuthComponent from '../components/shared/AuthComponent';
 import SignUpForm from '../components/signup/SignUpForm';
 
-const SignUp = () => {
+const Register = () => {
   const { isAuthenticated } = useOutletContext();
   if (isAuthenticated) return <Navigate to="/dashboard" />;
 
@@ -14,4 +14,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Register;
